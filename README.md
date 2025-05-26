@@ -6,10 +6,48 @@ LLM4SD is an open-source initiative that aims to leverage large language models 
 ### QuickStart:
 :star2: **First**, requirements are shown in the **requirements.txt**. Please use the requirements.txt to create the environment for running LLM4SD.
 
-:star2: **Second**, please **put your API key** in the **bash file** before you run the bash file. You can use either:
+:star2: **Second**, set up your OpenAI API configuration:
+
+#### Option 1: Edit the bash files directly
+You can directly edit the API configuration in the bash files (run_others.sh, run_tox21.sh, run_sider.sh, run_qm9.sh):
+
+```bash
+# API Configuration
+API_KEY='your_api_key_here' # OpenAI API key or Azure OpenAI API key
+
+# Azure OpenAI Configuration (leave empty to use standard OpenAI)
+AZURE_ENDPOINT='' # Azure OpenAI endpoint URL (e.g., 'https://your-resource.openai.azure.com')
+AZURE_API_VERSION='2023-05-15' # Azure OpenAI API version
+AZURE_DEPLOYMENT='' # Azure OpenAI deployment name for GPT-4
+```
+
+#### Option 2: Use the config.sh file
+For convenience, you can also copy the `config.example.sh` file to `config.sh`, set your API keys, and source it before running any scripts:
+
+```bash
+cp config.example.sh config.sh
+# Edit config.sh with your API keys and settings
+source config.sh
+# Then run any script
+./run_sider.sh
+```
+
+#### Configuration Options:
 
 - **Standard OpenAI API**: Set the `API_KEY` and leave Azure parameters empty
-- **Azure OpenAI API**: Set both `API_KEY` and Azure parameters (`AZURE_ENDPOINT`, `AZURE_API_VERSION`, `AZURE_DEPLOYMENT`)
+- **Azure OpenAI API**: Set both `API_KEY` (with your Azure API key) and Azure parameters (`AZURE_ENDPOINT`, `AZURE_API_VERSION`, `AZURE_DEPLOYMENT`)
+
+#### Testing your API configuration:
+
+You can test your API configuration with the provided `test_api_config.py` script:
+
+```bash
+# For OpenAI API
+python test_api_config.py --api_key "your_openai_api_key"
+
+# For Azure OpenAI API
+python test_api_config.py --api_key "your_azure_api_key" --azure_endpoint "https://your-resource.openai.azure.com" --azure_deployment "your_deployment_name"
+```
 
 The API will be used to call GPT-4 to conduct text summarisation for knowledge inference information and automatic code generation.
 
