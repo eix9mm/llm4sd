@@ -9,13 +9,21 @@
 # generating the corresponding code. Please ensure you have entered your API_KEY before initiating the run.
 ############################################################################################################
 
-# API Configuration
-API_KEY='' # OpenAI API key or Azure OpenAI API key for summarization and code generation
+# Check if config.sh exists and source it
+if [ -f "config.sh" ]; then
+    echo "Loading API configuration from config.sh..."
+    source config.sh
+else
+    echo "No config.sh found, using default configuration"
+fi
+
+# API Configuration (can be overridden by config.sh)
+API_KEY=${API_KEY:-''} # OpenAI API key or Azure OpenAI API key for summarization and code generation
 
 # Azure OpenAI Configuration (leave empty to use standard OpenAI)
-AZURE_ENDPOINT='' # Azure OpenAI endpoint URL (e.g., 'https://your-resource.openai.azure.com')
-AZURE_API_VERSION='2023-05-15' # Azure OpenAI API version
-AZURE_DEPLOYMENT='' # Azure OpenAI deployment name for GPT-4
+AZURE_ENDPOINT=${AZURE_ENDPOINT:-''} # Azure OpenAI endpoint URL (e.g., 'https://your-resource.openai.azure.com')
+AZURE_API_VERSION=${AZURE_API_VERSION:-'2023-05-15'} # Azure OpenAI API version
+AZURE_DEPLOYMENT=${AZURE_DEPLOYMENT:-''} # Azure OpenAI deployment name for GPT-4
 
 MODEL="galactica-6.7b" # ("falcon-40b" "galactica-30b" "chemdfm" "chemllm-7b") Falcon-7B fails in qm9 tasks
 # Generated content from "chemllm-7b" for inference.py may not meet the required standards for proceeding directly to Step 4.
