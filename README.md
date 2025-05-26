@@ -6,7 +6,12 @@ LLM4SD is an open-source initiative that aims to leverage large language models 
 ### QuickStart:
 :star2: **First**, requirements are shown in the **requirements.txt**. Please use the requirements.txt to create the environment for running LLM4SD.
 
-:star2: **Second**, please **put your Openai API key** in the **bash file** before you run the bash file. The Openai API will be used to call GPT-4 to conduct text summarisation for knowledge inference information and automatic code generation.
+:star2: **Second**, please **put your API key** in the **bash file** before you run the bash file. You can use either:
+
+- **Standard OpenAI API**: Set the `API_KEY` and leave Azure parameters empty
+- **Azure OpenAI API**: Set both `API_KEY` and Azure parameters (`AZURE_ENDPOINT`, `AZURE_API_VERSION`, `AZURE_DEPLOYMENT`)
+
+The API will be used to call GPT-4 to conduct text summarisation for knowledge inference information and automatic code generation.
 
 To run tasks for ["bbbp" "bace" "clintox" "esol" "freesolv" "hiv" "lipophilicity"]. Please run:
 ```

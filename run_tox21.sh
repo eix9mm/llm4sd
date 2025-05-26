@@ -9,7 +9,13 @@
 # generating the corresponding code. Please ensure you have entered your API_KEY before initiating the run.
 ############################################################################################################
 
-API_KEY='' # OpenAI API key for gpt4 summarization and code generation
+# API Configuration
+API_KEY='' # OpenAI API key or Azure OpenAI API key for summarization and code generation
+
+# Azure OpenAI Configuration (leave empty to use standard OpenAI)
+AZURE_ENDPOINT='' # Azure OpenAI endpoint URL (e.g., 'https://your-resource.openai.azure.com')
+AZURE_API_VERSION='2023-05-15' # Azure OpenAI API version
+AZURE_DEPLOYMENT='' # Azure OpenAI deployment name for GPT-4
 
 MODEL="galactica-6.7b" # ("falcon-40b" "galactica-30b" "chemdfm" "chemllm-7b") Falcon-7B fails in tox21 tasks
 # Generated content from "chemllm-7b" for inference.py may not meet the required standards for proceeding directly to Step 4.
@@ -38,6 +44,7 @@ for subtask in "${TOX21_SUBTASK[@]}"; do
     # Step 4: Summarize inference rules generated from the last step
     echo "Processin step 4 for Tox21-$subtask: Summarize rules from gpt4"
     python summarize_rules.py --input_model_folder ${MODEL} --dataset tox21 --subtask ${subtask} --list_num 30 --api_key ${API_KEY} \
+                              --azure_endpoint ${AZURE_ENDPOINT} --azure_api_version ${AZURE_API_VERSION} --azure_deployment ${AZURE_DEPLOYMENT} \
                               --output_folder "summarized_inference_rules"
 
     # Step 5: Interpretable model training and Evaluation
@@ -46,11 +53,14 @@ for subtask in "${TOX21_SUBTASK[@]}"; do
     # **** Must run synthesize and inference setting before run all setting ****
     echo "Processin step 5 for Tox21-$subtask: Interpretable model training and Evaluation"
     python code_gen_and_eval.py --dataset tox21 --subtask ${subtask} --model ${MODEL} --knowledge_type "synthesize" \
-                                --api_key ${API_KEY} --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
+                                --api_key ${API_KEY} --azure_endpoint ${AZURE_ENDPOINT} --azure_api_version ${AZURE_API_VERSION} --azure_deployment ${AZURE_DEPLOYMENT} \
+                                --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
     
     python code_gen_and_eval.py --dataset tox21 --subtask ${subtask} --model ${MODEL} --knowledge_type "inference" --list_num 30 \
-                                --api_key ${API_KEY} --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
+                                --api_key ${API_KEY} --azure_endpoint ${AZURE_ENDPOINT} --azure_api_version ${AZURE_API_VERSION} --azure_deployment ${AZURE_DEPLOYMENT} \
+                                --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
     
     python code_gen_and_eval.py --dataset tox21 --subtask ${subtask} --model ${MODEL} --knowledge_type "all" --list_num 30 \
-                                --api_key ${API_KEY} --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
+                                --api_key ${API_KEY} --azure_endpoint ${AZURE_ENDPOINT} --azure_api_version ${AZURE_API_VERSION} --azure_deployment ${AZURE_DEPLOYMENT} \
+                                --output_dir "llm4sd_results" --code_gen_folder "llm4sd_code_generation"
 done
