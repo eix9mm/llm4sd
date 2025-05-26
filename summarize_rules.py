@@ -5,15 +5,31 @@ import os
 import argparse
 
 
-def query(message, api_key, model="gpt-4-turbo"):
+def query(message, api_key, model="gpt-4-turbo", azure_endpoint=None, azure_api_version=None, azure_deployment=None):
     openai.api_key = api_key
+    
+    # Configure for Azure OpenAI if endpoint is provided
+    if azure_endpoint:
+        openai.api_type = "azure"
+        openai.api_base = azure_endpoint
+        openai.api_version = azure_api_version
+        
     while True:
         try:
-            response = openai.ChatCompletion.create(
-                model=model,
-                messages=[{"role": "user", "content": message}],
-                request_timeout=180,
-            )
+            if azure_endpoint:
+                # For Azure OpenAI, use deployment_id instead of model
+                response = openai.ChatCompletion.create(
+                    deployment_id=azure_deployment,
+                    messages=[{"role": "user", "content": message}],
+                    request_timeout=180,
+                )
+            else:
+                # For standard OpenAI
+                response = openai.ChatCompletion.create(
+                    model=model,
+                    messages=[{"role": "user", "content": message}],
+                    request_timeout=180,
+                )
             result = response["choices"][0]["message"]["content"].strip()
             return result
         except Exception as e:
@@ -129,7 +145,14 @@ def main():
     for rule_list in splitted_response_list:
         rule_content = '\n'.join(rule_list)
         input_content = summarize_prompt.format_map({'instruction': rule_content.strip()})
-        response = query(input_content, args.api_key, model='gpt-4-turbo')
+        response = query(
+            input_content, 
+            args.api_key, 
+            model='gpt-4-turbo', 
+            azure_endpoint=args.azure_endpoint if args.azure_endpoint else None,
+            azure_api_version=args.azure_api_version if args.azure_endpoint else None,
+            azure_deployment=args.azure_deployment if args.azure_endpoint else None
+        )
         response_list.extend(response.split('\n'))
     
     output_folder = os.path.join(args.output_folder, args.input_model_folder, args.dataset)
@@ -154,7 +177,10 @@ if __name__ == '__main__':
     parser.add_argument('--subtask', type=str, default='', help='subtask for sider/tox21/qm9')
     parser.add_argument('--list_num', type=int, default=30, help='number of lists for model inference')
     parser.add_argument('--output_folder', type=str, default='summarized_inference_rules', help="summarized rules folder")
-    parser.add_argument('--api_key', type=str, default="", help="Openai API Key")
+    parser.add_argument('--api_key', type=str, default="", help="OpenAI or Azure OpenAI API Key")
+    parser.add_argument('--azure_endpoint', type=str, default="", help="Azure OpenAI endpoint URL")
+    parser.add_argument('--azure_api_version', type=str, default="2023-05-15", help="Azure OpenAI API version")
+    parser.add_argument('--azure_deployment', type=str, default="", help="Azure OpenAI deployment name for GPT-4")
     args = parser.parse_args()
     main()
 

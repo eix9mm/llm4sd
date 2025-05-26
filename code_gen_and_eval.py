@@ -34,7 +34,10 @@ parser.add_argument('--knowledge_type', type=str, default='all', help='synthesiz
 parser.add_argument('--list_num', type=int, default=30, help='number of sample lists (30/50) for inference')
 parser.add_argument('--output_dir', type=str, default='eval_result', help='output folder')
 parser.add_argument('--code_gen_folder', type=str, default='eval_code_generation_repo')
-parser.add_argument('--api_key', type=str, default='', help='openai key')
+parser.add_argument('--api_key', type=str, default='', help='OpenAI or Azure OpenAI API key')
+parser.add_argument('--azure_endpoint', type=str, default='', help="Azure OpenAI endpoint URL")
+parser.add_argument('--azure_api_version', type=str, default="2023-05-15", help="Azure OpenAI API version")
+parser.add_argument('--azure_deployment', type=str, default='', help="Azure OpenAI deployment name for GPT-4")
 args = parser.parse_args()
 
 prompt = '''Question: Please generate the following rules to code like the following examples. You can define function name by yourself. Please ensure the code is executable! Each rule can have multiple functions! Don't make mistakes like ''rdkit.Chem.rdMolDescriptors' has no attribute 'CalXXX'. Don't skip rules! All functions have to return numbers and takes one argument mol!:
@@ -93,14 +96,31 @@ def load_data(which='train'):
 # automatically generate code based on prompt
 def auto_gen_code(prompt):
     openai.api_key = args.api_key
+    
+    # Configure for Azure OpenAI if endpoint is provided
+    if args.azure_endpoint:
+        openai.api_type = "azure"
+        openai.api_base = args.azure_endpoint
+        openai.api_version = args.azure_api_version
+        
     while True:
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=2000,
-                temperature=0.1,
-            )
+            if args.azure_endpoint:
+                # For Azure OpenAI
+                response = openai.ChatCompletion.create(
+                    deployment_id=args.azure_deployment,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=2000,
+                    temperature=0.1,
+                )
+            else:
+                # For standard OpenAI
+                response = openai.ChatCompletion.create(
+                    model="gpt-4-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=2000,
+                    temperature=0.1,
+                )
             # If no exception is raised, the request was successful, so we break out of the loop
             break
         except Exception as e:
